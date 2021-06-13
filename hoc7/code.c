@@ -50,6 +50,7 @@ constpush()
 {
 	Datum d;
 	d.val = ((Symbol *)*pc++)->u.val;
+	// printf("number pushed into stack: %lf\n",d.val);
 	push(d);
 }
 
@@ -57,6 +58,7 @@ varpush()
 {
 	Datum d;
 	d.sym = (Symbol *)(*pc++);
+	// printf("variable pushed into stack: %s\n",d.sym->name);
 	push(d);
 }
 
@@ -178,12 +180,26 @@ eval()		/* evaluate variable on stack */
 {
 	Datum d;
 	d = pop();
-	if (d.sym->type != VAR && d.sym->type != UNDEF)
+	if (d.sym->type != VAR && d.sym->type != UNDEF && d.sym->type != ARR)
 		execerror("attempt to evaluate non-variable", d.sym->name);
 	if (d.sym->type == UNDEF)
 		execerror("undefined variable", d.sym->name);
-	d.val = d.sym->u.val;
-	push(d);
+	if(d.sym->type == VAR) {
+		d.val = d.sym->u.val;
+		// printf("evaluating a variable value: %lf \n", d.val);
+		push(d);
+		return;
+	}
+	if(d.sym->type == ARR) {
+		Datum index;
+		index = pop();
+		double index_value = index.val;
+		// printf("index : %d \n", (int)index_value);
+		d.val = d.sym->u.arr[(int)index.val];
+		//array.val = index;
+		push(d); 
+		return ;
+	}
 }
 
 add()
@@ -213,7 +229,7 @@ mul()
 	push(d1);
 }
 
-Div()
+div()
 {
 	Datum d1, d2;
 	d2 = pop();
@@ -328,11 +344,31 @@ assign()
 	d1 = pop();
 	d2 = pop();
 	if (d1.sym->type != VAR && d1.sym->type != UNDEF)
-		execerror("assignment to non-variable",
-			d1.sym->name);
+		execerror("assignment to non-variable", d1.sym->name);
 	d1.sym->u.val = d2.val;
 	d1.sym->type = VAR;
+	// printf("assigning a variable : %s \n", d1.sym->name);
+	// printf("d2 value : %d \n", d2.val);
+	// printf("variable name : %s value : %d \n", d1.sym->name, d1.sym->u.val);
 	push(d2);
+	return ;
+}
+
+assignArr() {
+	Datum d1, d2, d3;
+	d1 = pop(); // printf("popped variable : %s \n", d1.sym->name);
+	d2 = pop(); // printf("popped number : %lf \n", d2.val);
+	d3 = pop(); // printf("popped number : %lf \n", d3.val);
+	double index = d3.val;
+	if (d1.sym->type != ARR && d1.sym->type != UNDEF)
+		execerror("assignment to non-variable", d1.sym->name);
+	d1.sym->u.arr[(int)index] = d2.val;
+	// printf("value : %lf \n", d1.sym->u.arr[(int)index]);
+	d1.sym->type = ARR;
+	// printf("d2 value : %d \n", d2.val);
+	// printf("variable name : %s value : %d \n", d1.sym->name, d1.sym->u.arr[index]);
+	push(d2);
+	return ;
 }
 
 print()	/* pop top value from stack, print it */

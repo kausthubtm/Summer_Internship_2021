@@ -1,17 +1,16 @@
 %{
 #include "hoc.h"
+#include <stdio.h>
 #define	code2(c1,c2)	code(c1); code(c2)
 #define	code3(c1,c2,c3)	code(c1); code(c2); code(c3)
 extern int indef;
-int sym[50];
-extern int yylex(void);
 %}
 %union {
 	Symbol	*sym;	/* symbol table pointer */
 	Inst	*inst;	/* machine instruction */
 	int	narg;	/* number of arguments */
 }
-%token	<sym>	NUMBER STRING PRINT VAR BLTIN UNDEF WHILE IF ELSE ARRAY
+%token	<sym>	NUMBER STRING PRINT VAR BLTIN UNDEF WHILE IF ELSE ARR
 %token	<sym>	FUNCTION PROCEDURE RETURN FUNC PROC READ
 %token	<narg>	ARG
 %type	<inst>	expr stmt asgn prlist stmtlist
@@ -36,6 +35,7 @@ list:	  /* nothing */
 	| list error '\n' { yyerrok; }
 	;
 asgn:	  VAR '=' expr { code3(varpush,(Inst)$1,assign); $$=$3; }
+	| ARR '[' expr ']' '=' expr { code3(varpush,(Inst)$1,assignArr); $$=$6; }
 	| ARG '=' expr
 	    { defnonly("$"); code2(argassign,(Inst)$1); $$=$3;}
 	;
@@ -74,6 +74,7 @@ stmtlist: /* nothing */		{ $$ = progp; }
 	;
 expr:	  NUMBER { $$ = code2(constpush, (Inst)$1); }
 	| VAR	 { $$ = code3(varpush, (Inst)$1, eval); }
+	| ARR '[' expr ']' {$$ = code3(varpush, (Inst)$1, eval); }
 	| ARG	 { defnonly("$"); $$ = code2(arg, (Inst)$1); }
 	| asgn
 	| FUNCTION begin '(' arglist ')'
@@ -84,7 +85,7 @@ expr:	  NUMBER { $$ = code2(constpush, (Inst)$1); }
 	| expr '+' expr	{ code(add); }
 	| expr '-' expr	{ code(sub); }
 	| expr '*' expr	{ code(mul); }
-	| expr '/' expr	{ code(Div); }
+	| expr '/' expr	{ code(div); }
 	| expr '^' expr	{ code (power); }
 	| '-' expr   %prec UNARYMINUS   { $$=$2; code(negate); }
 	| expr GT expr	{ code(gt); }
@@ -116,8 +117,6 @@ arglist:  /* nothing */ 	{ $$ = 0; }
 	| arglist ',' expr	{ $$ = $1 + 1; }
 	;
 %%
-
-
 	/* end of grammar */
 #include <stdio.h>
 #include <ctype.h>
@@ -134,7 +133,110 @@ int	gargc;
 
 int c;	/* global for use by warning() */
 
-backslash(c)	/* get next char with \'s interpreted */
+//===----------------------------------------------------------------------===//
+// Lexer
+//===----------------------------------------------------------------------===//
+
+yylex()		/* hoc7 */
+{
+
+
+	while ((c=getc(fin)) == ' ' || c == '\t')                                            /* remove whitespaces */
+		;
+
+
+	if (c == EOF)									                                    /* EOF */
+		return 0;
+
+
+	if (c == '.' || isdigit(c)) {	                                                    /* number */
+		double d;
+		ungetc(c, fin);
+		fscanf(fin, "%lf", &d);
+		yylval.sym = install("", NUMBER, d);
+		return NUMBER;
+	}
+
+
+
+	if (isalpha(c)) {                                                                   /* variable */
+		Symbol *s;
+		char sbuf[100], *p = sbuf;
+		do {
+			if (p >= sbuf + sizeof(sbuf) - 1) {
+				*p = '\0';
+				execerror("name too long", sbuf);
+			}
+			*p++ = c;
+		} while ((c=getc(fin)) != EOF && isalnum(c));
+
+		if(c == '['){
+			ungetc(c, fin);
+			*p = '\0';
+			if ((s=lookup(sbuf)) == 0)
+				s = install(sbuf, UNDEF, 0.0);
+			yylval.sym = s;
+			return s->type == UNDEF ? ARR : s->type;
+		}
+		else {
+			ungetc(c, fin);
+			*p = '\0';
+			if ((s=lookup(sbuf)) == 0)
+				s = install(sbuf, UNDEF, 0.0);
+			yylval.sym = s;
+			return s->type == UNDEF ? VAR : s->type;
+		}
+	}
+
+	if(c == '[' || c == ']') return c;
+
+
+
+	if (c == '$') {	                                                                    /* argument? */
+		int n = 0;
+		while (isdigit(c=getc(fin)))
+			n = 10 * n + c - '0';
+		ungetc(c, fin);
+		if (n == 0)
+			execerror("strange $...", (char *)0);
+		yylval.narg = n;
+		return ARG;
+	}
+
+
+	if (c == '"') {	                                                                   /* quoted string */
+		char sbuf[100], *p, *emalloc();
+		for (p = sbuf; (c=getc(fin)) != '"'; p++) {
+			if (c == '\n' || c == EOF)
+				execerror("missing quote", "");
+			if (p >= sbuf + sizeof(sbuf) - 1) {
+				*p = '\0';
+				execerror("string too long", sbuf);
+			}
+			*p = backslash(c);
+		}
+		*p = 0;
+		yylval.sym = (Symbol *)emalloc(strlen(sbuf)+1);
+		strcpy(yylval.sym, sbuf);
+		return STRING;
+	}
+	
+
+
+	switch (c) {                                                                     /* comparison operators */
+	case '>':	return follow('=', GE, GT);
+	case '<':	return follow('=', LE, LT);
+	case '=':	return follow('=', EQ, '=');
+	case '!':	return follow('=', NE, NOT);
+	case '|':	return follow('|', OR, '|');
+	case '&':	return follow('&', AND, '&');
+	case '\n':	lineno++; return '\n';
+	default:	return c;
+	}
+
+}
+
+backslash(c)	                                                        /* get next char with \'s interpreted */
 	int c;
 {
 	char *index();	/* `strchr()' in some systems */
@@ -147,7 +249,7 @@ backslash(c)	/* get next char with \'s interpreted */
 	return c;
 }
 
-follow(expect, ifyes, ifno)	/* look ahead for >=, etc. */
+follow(expect, ifyes, ifno)	                                              /* look ahead for >=, etc. */
 {
 	int c = getc(fin);
 
@@ -157,28 +259,28 @@ follow(expect, ifyes, ifno)	/* look ahead for >=, etc. */
 	return ifno;
 }
 
-defnonly(s)	/* warn if illegal definition */
+defnonly(s)	                                                            /* warn if illegal definition */
 	char *s;
 {
 	if (!indef)
 		execerror(s, "used outside definition");
 }
 
-yyerror(s)	/* report compile-time error */
+yyerror(s)	                                                           /* report compile-time error */
 	char *s;
 {
 	warning(s, (char *)0);
 }
 
-execerror(s, t)	/* recover from run-time error */
+execerror(s, t)	                                                       /* recover from run-time error */
 	char *s, *t;
 {
 	warning(s, t);
-	fseek(fin, 0L, 2);		/* flush rest of file */
+	fseek(fin, 0L, 2);		                                           /* flush rest of file */
 	longjmp(begin, 0);
 }
 
-fpecatch()	/* catch floating point exceptions */
+fpecatch()	                                                           /* catch floating point exceptions */
 {
 	execerror("floating point exception", (char *) 0);
 }
@@ -244,4 +346,3 @@ warning(s, t)	/* print warning message */
 	if (c == '\n')
 		lineno++;
 }
-

@@ -58,7 +58,7 @@ extern int yydebug;
     WHILE = 264,
     IF = 265,
     ELSE = 266,
-    ARRAY = 267,
+    ARR = 267,
     FUNCTION = 268,
     PROCEDURE = 269,
     RETURN = 270,
@@ -88,7 +88,7 @@ extern int yydebug;
 #define WHILE 264
 #define IF 265
 #define ELSE 266
-#define ARRAY 267
+#define ARR 267
 #define FUNCTION 268
 #define PROCEDURE 269
 #define RETURN 270
@@ -111,7 +111,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 9 "hoc.y"
+#line 8 "hoc.y"
 
 	Symbol	*sym;	/* symbol table pointer */
 	Inst	*inst;	/* machine instruction */
