@@ -1,0 +1,29 @@
+size = 5
+
+arr[0] = 5
+arr[1] = 1.23
+arr[2] = 99.00
+arr[3] = 0
+arr[4] = -.123
+
+i = 0
+while (i < size-1) {
+    j = i + 1
+    minIndx = i
+    while(j < size) {
+        if(arr[j] < arr[minIndx]) {
+            minIndx = j
+        }
+        j = j + 1
+    }
+    temp = arr[minIndx]
+    arr[minIndx] = arr[i]
+    arr[i] = temp
+    i = i + 1
+}
+
+i=0
+while (i < size) {
+    print(arr[i])
+    i = i + 1
+}

@@ -1,8 +1,8 @@
 YFLAGS = -d
 OBJS = hoc.o code.o init.o math.o symbol.o
 
-hoc6:	$(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) -lm -o hoc6
+hoc7:	$(OBJS)
+	$(CC) $(CFLAGS) $(OBJS) -lm -o hoc7
 
 hoc.o code.o init.o symbol.o:	hoc.h
 

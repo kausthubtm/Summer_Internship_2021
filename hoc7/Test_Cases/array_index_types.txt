@@ -1,0 +1,9 @@
+arr[10] = 47.72
+print(arr[10])
+
+i = 17
+arr[i] = 14
+print(arr[i])
+
+arr[i*4-2] = -4.5
+print(arr[i*4-2])
