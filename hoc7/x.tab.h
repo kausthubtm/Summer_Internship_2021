@@ -59,23 +59,24 @@ extern int yydebug;
     IF = 265,
     ELSE = 266,
     ARR = 267,
-    FUNCTION = 268,
-    PROCEDURE = 269,
-    RETURN = 270,
-    FUNC = 271,
-    PROC = 272,
-    READ = 273,
-    ARG = 274,
-    OR = 275,
-    AND = 276,
-    GT = 277,
-    GE = 278,
-    LT = 279,
-    LE = 280,
-    EQ = 281,
-    NE = 282,
-    UNARYMINUS = 283,
-    NOT = 284
+    MAT = 268,
+    FUNCTION = 269,
+    PROCEDURE = 270,
+    RETURN = 271,
+    FUNC = 272,
+    PROC = 273,
+    READ = 274,
+    ARG = 275,
+    OR = 276,
+    AND = 277,
+    GT = 278,
+    GE = 279,
+    LT = 280,
+    LE = 281,
+    EQ = 282,
+    NE = 283,
+    UNARYMINUS = 284,
+    NOT = 285
   };
 #endif
 /* Tokens.  */
@@ -89,23 +90,24 @@ extern int yydebug;
 #define IF 265
 #define ELSE 266
 #define ARR 267
-#define FUNCTION 268
-#define PROCEDURE 269
-#define RETURN 270
-#define FUNC 271
-#define PROC 272
-#define READ 273
-#define ARG 274
-#define OR 275
-#define AND 276
-#define GT 277
-#define GE 278
-#define LT 279
-#define LE 280
-#define EQ 281
-#define NE 282
-#define UNARYMINUS 283
-#define NOT 284
+#define MAT 268
+#define FUNCTION 269
+#define PROCEDURE 270
+#define RETURN 271
+#define FUNC 272
+#define PROC 273
+#define READ 274
+#define ARG 275
+#define OR 276
+#define AND 277
+#define GT 278
+#define GE 279
+#define LT 280
+#define LE 281
+#define EQ 282
+#define NE 283
+#define UNARYMINUS 284
+#define NOT 285
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -117,7 +119,7 @@ union YYSTYPE
 	Inst	*inst;	/* machine instruction */
 	int	narg;	/* number of arguments */
 
-#line 121 "y.tab.h"
+#line 123 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

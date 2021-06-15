@@ -1,0 +1,39 @@
+size = 3
+c(0,0) = 0
+
+i=0
+while(i<size) {
+    j=0
+    while(j<size) {
+        a(i,j) = i+j
+        b(i,j) = i*j
+        j = j + 1
+    }
+    i = i + 1
+}
+
+
+i=0
+while(i<size) {
+    j=0
+    while(j<size) {
+        k=0
+        while(k<size) {
+            c(i,j) = c(i,j) + a(i,k)*b(k,j)
+            k = k + 1
+        }
+        j = j + 1
+    }
+    i = i + 1
+}
+
+
+i=0
+while(i<size) {
+    j=0
+    while(j<size) {
+        print(c(i,j))
+        j = j + 1
+    }
+    i = i + 1
+}

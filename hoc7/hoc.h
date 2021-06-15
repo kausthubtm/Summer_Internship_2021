@@ -6,7 +6,8 @@ typedef struct Symbol {	/* symbol table entry */
 		double	(*ptr)();	/* BLTIN */
 		int	(*defn)();	/* FUNCTION, PROCEDURE */
 		char	*str;		/* STRING */
-		double  arr[1000];          /* ARRAY */ 
+		double  arr[100];          /* ARRAY */ 
+		double mat[100][100]   /* MATRIX */
 	} u;
 	struct Symbol	*next;	/* to link to another */
 } Symbol;
@@ -17,13 +18,13 @@ typedef union Datum {	/* interpreter stack type */
 	Symbol	*sym;
 } Datum;
 extern	Datum pop();
-extern	eval(), add(), sub(), mul(), div(), negate(), power();
+extern	eval(), add(), sub(), mul(), div(), negate(), power(), sorting();
 
 typedef int (*Inst)();
 #define	STOP	(Inst) 0
 
 extern	Inst *progp, *progbase, prog[], *code();
-extern	assign(), assignArr(), bltin(), varpush(), constpush(), print(), varread();
+extern	assign(), assignArr(), assignMat(), bltin(), varpush(), constpush(), print(), varread();
 extern	prexpr(), prstr();
 extern	gt(), lt(), eq(), ge(), le(), ne(), and(), or(), not();
 extern	ifcode(), whilecode(), call(), arg(), argassign();

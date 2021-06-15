@@ -2,7 +2,7 @@
 #include "y.tab.h"
 #include <math.h>
 
-extern double	Log(), Log10(), Sqrt(), Exp(), integer();
+extern double	Log(), Log10(), Sqrt(), Exp(), integer(), Sort();
 
 static struct {		/* Keywords */
 	char	*name;
@@ -44,6 +44,7 @@ static struct {		/* Built-ins */
 	"sqrt",	Sqrt,	/* checks range */
 	"int",	integer,
 	"abs",	fabs,
+	"sort", Sort,
 	0,	0
 };
 

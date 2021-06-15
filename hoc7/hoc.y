@@ -10,7 +10,7 @@ extern int indef;
 	Inst	*inst;	/* machine instruction */
 	int	narg;	/* number of arguments */
 }
-%token	<sym>	NUMBER STRING PRINT VAR BLTIN UNDEF WHILE IF ELSE ARR
+%token	<sym>	NUMBER STRING PRINT VAR BLTIN UNDEF WHILE IF ELSE ARR MAT
 %token	<sym>	FUNCTION PROCEDURE RETURN FUNC PROC READ
 %token	<narg>	ARG
 %type	<inst>	expr stmt asgn prlist stmtlist
@@ -36,6 +36,7 @@ list:	  /* nothing */
 	;
 asgn:	  VAR '=' expr { code3(varpush,(Inst)$1,assign); $$=$3; }
 	| ARR '[' expr ']' '=' expr { code3(varpush,(Inst)$1,assignArr); $$=$6; }
+	| MAT '(' expr ',' expr ')' '=' expr { code3(varpush, (Inst)$1, assignMat); $$=$8; }
 	| ARG '=' expr
 	    { defnonly("$"); code2(argassign,(Inst)$1); $$=$3;}
 	;
@@ -75,12 +76,14 @@ stmtlist: /* nothing */		{ $$ = progp; }
 expr:	  NUMBER { $$ = code2(constpush, (Inst)$1); }
 	| VAR	 { $$ = code3(varpush, (Inst)$1, eval); }
 	| ARR '[' expr ']' {$$ = code3(varpush, (Inst)$1, eval); }
+	| MAT '(' expr ',' expr ')' {$$ = code3(varpush, (Inst)$1, eval); }
 	| ARG	 { defnonly("$"); $$ = code2(arg, (Inst)$1); }
 	| asgn
 	| FUNCTION begin '(' arglist ')'
 		{ $$ = $2; code3(call,(Inst)$1,(Inst)$4); }
 	| READ '(' VAR ')' { $$ = code2(varread, (Inst)$3); }
 	| BLTIN '(' expr ')' { $$=$3; code2(bltin, (Inst)$1->u.ptr); }
+	| BLTIN '(' ARR'[' expr ']' ',' NUMBER ')' { $$=$3; code2(bltin, (Inst)$1->u.ptr); }
 	| '(' expr ')'	{ $$ = $2; }
 	| expr '+' expr	{ code(add); }
 	| expr '-' expr	{ code(sub); }
@@ -178,6 +181,14 @@ yylex()		/* hoc7 */
 			yylval.sym = s;
 			return s->type == UNDEF ? ARR : s->type;
 		}
+		if(c == '('){
+			ungetc(c, fin);
+			*p = '\0';
+			if ((s=lookup(sbuf)) == 0)
+				s = install(sbuf, UNDEF, 0.0);
+			yylval.sym = s;
+			return s->type == UNDEF ? MAT : s->type;
+		}
 		else {
 			ungetc(c, fin);
 			*p = '\0';
@@ -189,7 +200,6 @@ yylex()		/* hoc7 */
 	}
 
 	if(c == '[' || c == ']') return c;
-
 
 
 	if (c == '$') {	                                                                    /* argument? */
@@ -285,7 +295,7 @@ fpecatch()	                                                           /* catch f
 	execerror("floating point exception", (char *) 0);
 }
 
-main(argc, argv)	/* hoc6 */
+main(argc, argv)	/* hoc7 */
 	char *argv[];
 {
 	int i, fpecatch();
@@ -301,7 +311,7 @@ main(argc, argv)	/* hoc6 */
 		gargc = argc-1;
 	}
 	init();
-	while (moreinput())
+	while (moreinput()) 
 		run();
 	return 0;
 }
@@ -328,8 +338,11 @@ run()	/* execute until EOF */
 {
 	setjmp(begin);
 	signal(SIGFPE, fpecatch);
-	for (initcode(); yyparse(); initcode())
+	for (initcode(); yyparse(); initcode()){
+		/* printf("hi\n"); */
 		execute(progbase);
+	}
+		
 }
 
 warning(s, t)	/* print warning message */

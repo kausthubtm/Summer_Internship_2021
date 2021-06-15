@@ -170,17 +170,26 @@ argassign() 	/* store top of stack in argument */
 bltin() 
 {
 
-	Datum d;
-	d = pop();
-	d.val = (*(double (*)())*pc++)(d.val);
-	push(d);
+	Datum d1;
+
+	if(d1.sym->type == ARR) {
+		printf("hello");
+		return;
+	}
+	else {
+		d1 = pop();
+		d1.val = (*(double (*)())*pc++)(d1.val);
+		push(d1);
+		return;
+	}
+
 }
 
 eval()		/* evaluate variable on stack */
 {
 	Datum d;
 	d = pop();
-	if (d.sym->type != VAR && d.sym->type != UNDEF && d.sym->type != ARR)
+	if (d.sym->type != VAR && d.sym->type != UNDEF && d.sym->type != ARR && d.sym->type != MAT)
 		execerror("attempt to evaluate non-variable", d.sym->name);
 	if (d.sym->type == UNDEF)
 		execerror("undefined variable", d.sym->name);
@@ -198,6 +207,16 @@ eval()		/* evaluate variable on stack */
 		d.val = d.sym->u.arr[(int)index.val];
 		//array.val = index;
 		push(d); 
+		return ;
+	}
+	if(d.sym->type == MAT) {
+		Datum iIndex, jIndex;
+		jIndex = pop();
+		iIndex = pop();
+		double iIndex_value = iIndex.val;
+		double jIndex_value = jIndex.val;
+		d.val = d.sym->u.mat[(int)iIndex_value][(int)jIndex_value];
+		push(d);
 		return ;
 	}
 }
@@ -338,6 +357,25 @@ power()
 	push(d1);
 }
 
+sorting()
+{
+	Datum d1, d2, d3;
+	d1 = pop();  printf("popped variable : %s \n", d1.sym->name);
+	d2 = pop();  printf("popped number : %lf \n", d2.val);
+	d3 = pop();  printf("popped number : %lf \n", d3.val);
+	//double start = d3.val;
+	if (d1.sym->type != ARR && d1.sym->type != UNDEF)
+		execerror("sort function to a non-variable", d1.sym->name);
+	Sort(d1.sym->u.arr, d3.val, d2.val);
+	// printf("value : %lf \n", d1.sym->u.arr[(int)index]);
+	d1.sym->type = ARR;
+	// printf("d2 value : %d \n", d2.val);
+	// printf("variable name : %s value : %d \n", d1.sym->name, d1.sym->u.arr[index]);
+	push(d2);
+	return ;
+
+}
+
 assign()
 {
 	Datum d1, d2;
@@ -365,6 +403,25 @@ assignArr() {
 	d1.sym->u.arr[(int)index] = d2.val;
 	// printf("value : %lf \n", d1.sym->u.arr[(int)index]);
 	d1.sym->type = ARR;
+	// printf("d2 value : %d \n", d2.val);
+	// printf("variable name : %s value : %d \n", d1.sym->name, d1.sym->u.arr[index]);
+	push(d2);
+	return ;
+}
+
+assignMat() {
+	Datum d1, d2, d3, d4;
+	d1 = pop(); // printf("popped variable : %s \n", d1.sym->name);
+	d2 = pop(); // printf("popped number : %lf \n", d2.val);
+	d3 = pop(); // printf("popped number : %lf \n", d3.val);
+	d4 = pop(); // printf("popped number : %lf \n", d4.val);
+	double iIndex = d4.val;
+	double jIndex = d3.val;
+	if (d1.sym->type != MAT && d1.sym->type != UNDEF)
+		execerror("assignment to non-variable", d1.sym->name);
+	d1.sym->u.mat[(int)iIndex][(int)jIndex] = d2.val;
+	// printf("value : %lf \n", d1.sym->u.arr[(int)index]);
+	d1.sym->type = MAT;
 	// printf("d2 value : %d \n", d2.val);
 	// printf("variable name : %s value : %d \n", d1.sym->name, d1.sym->u.arr[index]);
 	push(d2);
@@ -426,6 +483,8 @@ Inst *code(f)	/* install one instruction or operand */
 execute(p)
 	Inst *p;
 {
-	for (pc = p; *pc != STOP && !returning; )
+	for (pc = p; *pc != STOP && !returning; ){
 		(*((++pc)[-1]))();
+	}
+		
 }

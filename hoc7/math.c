@@ -38,6 +38,22 @@ double integer(x)
 	return (double)(long)x;
 }
 
+
+double* Sort(double* arr, double start, double size) {
+	for(int i=(int)start; i<(int)(size-1); i++) {
+    	int minIndx = i;
+    	for(int j=i+1; j < size; j++) {
+        	if(arr[j] < arr[minIndx]) {
+            	minIndx = j;
+        	}
+    	}
+    	int temp = arr[minIndx];
+    	arr[minIndx] = arr[i];
+    	arr[i] = temp;
+	}
+	return arr;
+}
+
 double errcheck(d, s)	/* check result of library call */
 	double d;
 	char *s;
