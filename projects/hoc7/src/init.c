@@ -14,6 +14,7 @@ static struct {		/* Keywords */
 	"if",		IF,
 	"else",		ELSE,
 	"while",	WHILE,
+	"for",      FOR,
 	"print",	PRINT,
 	"read",		READ,
 	0,		0,

@@ -10,11 +10,11 @@ extern int indef;
 	Inst	*inst;	/* machine instruction */
 	int	narg;	/* number of arguments */
 }
-%token	<sym>	NUMBER STRING PRINT VAR BLTIN UNDEF WHILE IF ELSE ARR MAT
+%token	<sym>	NUMBER STRING PRINT VAR BLTIN UNDEF WHILE IF ELSE ARR MAT FOR
 %token	<sym>	FUNCTION PROCEDURE RETURN FUNC PROC READ
 %token	<narg>	ARG
-%type	<inst>	expr stmt asgn prlist stmtlist
-%type	<inst>	cond while if begin end 
+%type	<inst>	expr stmt asgn prlist stmtlist expr2
+%type	<inst>	cond while if begin end for cond2
 %type	<sym>	procname
 %type	<narg>	arglist
 %right	'='
@@ -47,6 +47,10 @@ stmt:	  expr	{ code(pop); }
 	| PROCEDURE begin '(' arglist ')'
 		{ $$ = $2; code3(call, (Inst)$1, (Inst)$4); }
 	| PRINT prlist	{ $$ = $2; }
+	| for '[' expr ']' '(' cond2 ';' expr2 ')' stmt end {
+		($1)[1] = (Inst)$9;	/* body of loop */
+		($1)[2] = (Inst)$7; /* increment or decrement */
+		($1)[2] = (Inst)$10; }	/* end, if cond fails */
 	| while cond stmt end {
 		($1)[1] = (Inst)$3;	/* body of loop */
 		($1)[2] = (Inst)$4; }	/* end, if cond fails */
@@ -60,6 +64,10 @@ stmt:	  expr	{ code(pop); }
 	| '{' stmtlist '}'	{ $$ = $2; }
 	;
 cond:	  '(' expr ')'	{ code(STOP); $$ = $2; }
+	;
+cond2:  expr   { code(STOP); $$ = $1; }
+	;
+for: 	FOR	{ $$ = code2(forcode,STOP); code3(STOP,STOP,STOP); }
 	;
 while:	  WHILE	{ $$ = code3(whilecode,STOP,STOP); }
 	;
@@ -100,6 +108,9 @@ expr:	  NUMBER { $$ = code2(constpush, (Inst)$1); }
 	| expr AND expr	{ code(and); }
 	| expr OR expr	{ code(or); }
 	| NOT expr	{ $$ = $2; code(not); }
+	;
+expr2: /* nothing */
+	| expr				
 	;
 prlist:	  expr			{ code(prexpr); }
 	| STRING		{ $$ = code2(prstr, (Inst)$1); }

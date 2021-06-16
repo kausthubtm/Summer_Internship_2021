@@ -37,12 +37,14 @@ push(d)
 	if (stackp >= &stack[NSTACK])
 		execerror("stack too deep", (char *)0);
 	*stackp++ = d;
+	// printf("pushing\n");
 }
 
 Datum pop()
 {
 	if (stackp == stack)
 		execerror("stack underflow", (char *)0);
+	// printf("popping\n");
 	return *--stackp;
 }
 
@@ -50,7 +52,7 @@ constpush()
 {
 	Datum d;
 	d.val = ((Symbol *)*pc++)->u.val;
-	// printf("number pushed into stack: %lf\n",d.val);
+	printf("number pushed into stack: %lf\n",d.val);
 	push(d);
 }
 
@@ -58,7 +60,7 @@ varpush()
 {
 	Datum d;
 	d.sym = (Symbol *)(*pc++);
-	// printf("variable pushed into stack: %s\n",d.sym->name);
+	printf("variable pushed into stack: %s\n",d.sym->name);
 	push(d);
 }
 
@@ -70,14 +72,36 @@ whilecode()
 	execute(savepc+2);	/* condition */
 	d = pop();
 	while (d.val) {
+		// printf("d val before loop : %lf\n", d.val);
 		execute(*((Inst **)(savepc)));	/* body */
 		if (returning)
 			break;
 		execute(savepc+2);	/* condition */
 		d = pop();
+		// printf("d val after loop : %lf\n", d.val);
 	}
 	if (!returning)
 		pc = *((Inst **)(savepc+1)); /* next stmt */
+}
+
+forcode()
+{
+	Datum d;
+	Inst *savepc = pc;
+
+	execute(savepc+4);	/* condition */
+	d = pop();
+	while (d.val) {
+		// printf("d val before loop : %lf\n", d.val);
+		execute(*((Inst **)(savepc)));	/* body */
+		if (returning)
+			break;
+		execute(savepc+4);	/* condition */
+		d = pop();
+		// printf("d val after loop : %lf\n", d.val);
+	}
+	if (!returning)
+		pc = *((Inst **)(savepc+2)); /* next stmt */
 }
 
 ifcode() 
@@ -281,6 +305,7 @@ lt()
 	Datum d1, d2;
 	d2 = pop();
 	d1 = pop();
+	printf("checking condition : %lf \n", d1.val);
 	d1.val = (double)(d1.val < d2.val);
 	push(d1);
 }
@@ -385,7 +410,7 @@ assign()
 		execerror("assignment to non-variable", d1.sym->name);
 	d1.sym->u.val = d2.val;
 	d1.sym->type = VAR;
-	// printf("assigning a variable : %s \n", d1.sym->name);
+	printf("assigning a variable : %s \n", d1.sym->name);
 	// printf("d2 value : %d \n", d2.val);
 	// printf("variable name : %s value : %d \n", d1.sym->name, d1.sym->u.val);
 	push(d2);
@@ -477,6 +502,7 @@ Inst *code(f)	/* install one instruction or operand */
 	if (progp >= &prog[NPROG])
 		execerror("program too big", (char *)0);
 	*progp++ = f;
+	// printf("Inst\n");
 	return oprogp;
 }
 
@@ -484,6 +510,7 @@ execute(p)
 	Inst *p;
 {
 	for (pc = p; *pc != STOP && !returning; ){
+		// printf("execute\n");
 		(*((++pc)[-1]))();
 	}
 		
