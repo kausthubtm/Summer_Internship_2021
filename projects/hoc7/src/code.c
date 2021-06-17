@@ -52,7 +52,7 @@ constpush()
 {
 	Datum d;
 	d.val = ((Symbol *)*pc++)->u.val;
-	printf("number pushed into stack: %lf\n",d.val);
+	// printf("number pushed into stack: %lf\n",d.val);
 	push(d);
 }
 
@@ -60,7 +60,7 @@ varpush()
 {
 	Datum d;
 	d.sym = (Symbol *)(*pc++);
-	printf("variable pushed into stack: %s\n",d.sym->name);
+	// printf("variable pushed into stack: %s\n",d.sym->name);
 	push(d);
 }
 
@@ -89,14 +89,16 @@ forcode()
 	Datum d;
 	Inst *savepc = pc;
 
-	execute(savepc+4);	/* condition */
+	// execute(*((Inst **)(savepc+1)));
+	execute(savepc+3);	/* condition */
 	d = pop();
 	while (d.val) {
 		// printf("d val before loop : %lf\n", d.val);
 		execute(*((Inst **)(savepc)));	/* body */
 		if (returning)
 			break;
-		execute(savepc+4);	/* condition */
+		execute(*((Inst **)(savepc+1)));
+		execute(savepc+3);	/* condition */
 		d = pop();
 		// printf("d val after loop : %lf\n", d.val);
 	}
@@ -305,7 +307,7 @@ lt()
 	Datum d1, d2;
 	d2 = pop();
 	d1 = pop();
-	printf("checking condition : %lf \n", d1.val);
+	// printf("checking condition : %lf \n", d1.val);
 	d1.val = (double)(d1.val < d2.val);
 	push(d1);
 }
@@ -410,7 +412,7 @@ assign()
 		execerror("assignment to non-variable", d1.sym->name);
 	d1.sym->u.val = d2.val;
 	d1.sym->type = VAR;
-	printf("assigning a variable : %s \n", d1.sym->name);
+	// printf("assigning a variable : %s \n", d1.sym->name);
 	// printf("d2 value : %d \n", d2.val);
 	// printf("variable name : %s value : %d \n", d1.sym->name, d1.sym->u.val);
 	push(d2);
