@@ -24,7 +24,7 @@ typedef int (*Inst)();
 #define	STOP	(Inst) 0
 
 extern	Inst *progp, *progbase, prog[], *code();
-extern	assign(), assignArr(), assignMat(), bltin(), varpush(), constpush(), print(), varread();
+extern	assign(), assignArr(), assignMat(), bltin(), bltinArr(), varpush(), constpush(), print(), varread();
 extern	prexpr(), prstr();
 extern	gt(), lt(), eq(), ge(), le(), ne(), and(), or(), not();
 extern	ifcode(), whilecode(), forcode(), call(), arg(), argassign();

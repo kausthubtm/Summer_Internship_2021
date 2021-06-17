@@ -195,20 +195,26 @@ argassign() 	/* store top of stack in argument */
 
 bltin() 
 {
-
 	Datum d1;
+	d1 = pop();
+	d1.val = (*(double (*)())*pc++)(d1.val);
+	push(d1);
+	return;
+}
 
-	if(d1.sym->type == ARR) {
-		printf("hello");
-		return;
-	}
-	else {
-		d1 = pop();
-		d1.val = (*(double (*)())*pc++)(d1.val);
-		push(d1);
-		return;
-	}
+bltinArr()
+{
+	Datum d1, d2;
+	d1 = pop();
+	d2 = pop();
+	// printf("hello %lf\n", d1.val);
+	printf("hello %s\n", d2.sym->type);
 
+	sorting(d1,d2);
+
+
+
+	return ;
 }
 
 eval()		/* evaluate variable on stack */
@@ -230,6 +236,7 @@ eval()		/* evaluate variable on stack */
 		index = pop();
 		double index_value = index.val;
 		// printf("index : %d \n", (int)index_value);
+		// printf("evaluating a array: %s \n", d.sym->name);
 		d.val = d.sym->u.arr[(int)index.val];
 		//array.val = index;
 		push(d); 
@@ -384,21 +391,21 @@ power()
 	push(d1);
 }
 
-sorting()
+sorting(Datum d1, Datum d2)
 {
-	Datum d1, d2, d3;
-	d1 = pop();  printf("popped variable : %s \n", d1.sym->name);
-	d2 = pop();  printf("popped number : %lf \n", d2.val);
-	d3 = pop();  printf("popped number : %lf \n", d3.val);
+	printf("hello %lf\n", d1.val);
+	printf("hello %lf\n", d2.val);
+	// printf("hello %s\n", d2.sym->name);
+	
 	//double start = d3.val;
-	if (d1.sym->type != ARR && d1.sym->type != UNDEF)
-		execerror("sort function to a non-variable", d1.sym->name);
-	Sort(d1.sym->u.arr, d3.val, d2.val);
+	// if (d1.sym->type != ARR && d1.sym->type != UNDEF)
+		// execerror("sort function to a non-variable", d1.sym->name);
+	// Sort(d1.sym->u.arr, d3.val, d2.val);
 	// printf("value : %lf \n", d1.sym->u.arr[(int)index]);
-	d1.sym->type = ARR;
+	// d1.sym->type = ARR;
 	// printf("d2 value : %d \n", d2.val);
 	// printf("variable name : %s value : %d \n", d1.sym->name, d1.sym->u.arr[index]);
-	push(d2);
+	// push(d2);
 	return ;
 
 }
@@ -457,9 +464,14 @@ assignMat() {
 
 print()	/* pop top value from stack, print it */
 {
+	if (stackp == stack) {
+		return ;
+	}
 	Datum d;
 	d = pop();
+	printf("hello from print");
 	printf("\t%.8g\n", d.val);
+	return ;
 }
 
 prexpr()	/* print numeric value */
