@@ -1,3 +1,3 @@
 # Summer_Study
 
-This repository contains the bi-weekly reports and updates on the summer study.  
+This repository contains the reports and updates on the concepts that I learnt during the summer 2021.  
