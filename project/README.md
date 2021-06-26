@@ -15,7 +15,8 @@ This repo contains an upgraded version of hoc6 and I call it **hoc7** :D !! .
 - Array functionality
 - Matrix functionality
 - For loop functionality
-- Working on builtin function for sort
+- Increment and Decrement Operations
+- Builtin function for sort
 
 ## Extra
 - [This](https://github.com/kausthubtm/HOC) repo contains information and code of all the older versions of hoc. 
