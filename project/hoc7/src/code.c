@@ -23,6 +23,7 @@ typedef struct Frame {	/* proc/func call stack frame */
 #define	NFRAME	100
 Frame	frame[NFRAME];
 Frame	*fp;		/* frame pointer */
+Symbol* temp;
 
 initcode() {
 	progp = progbase;
@@ -226,8 +227,8 @@ eval()		/* evaluate variable on stack */
 	if (d.sym->type == UNDEF)
 		execerror("undefined variable", d.sym->name);
 	if(d.sym->type == VAR) {
+		temp = d.sym; 
 		d.val = d.sym->u.val;
-		// printf("evaluating a variable value: %lf \n", d.val);
 		push(d);
 		return;
 	}
@@ -297,6 +298,22 @@ negate()
 	Datum d;
 	d = pop();
 	d.val = -d.val;
+	push(d);
+}
+
+inc() {
+	Datum d;
+	d = pop();
+	d.val = d.val + 1;
+	temp->u.val = d.val;
+	push(d);
+}
+
+dec() {
+	Datum d;
+	d = pop();
+	d.val = d.val - 1;
+	temp->u.val = d.val;
 	push(d);
 }
 
@@ -469,7 +486,7 @@ print()	/* pop top value from stack, print it */
 	}
 	Datum d;
 	d = pop();
-	printf("hello from print");
+	// printf("hello from print");
 	printf("\t%.8g\n", d.val);
 	return ;
 }

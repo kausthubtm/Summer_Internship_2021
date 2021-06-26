@@ -23,7 +23,7 @@ extern int indef;
 %left	GT GE LT LE EQ NE
 %left	'+' '-'
 %left	'*' '/'
-%left	UNARYMINUS NOT 
+%left	UNARYMINUS NOT INC DEC
 %right	'^'
 %%
 list:	  /* nothing */
@@ -108,6 +108,10 @@ expr:	  NUMBER { $$ = code2(constpush, (Inst)$1); }
 	| expr AND expr	{ code(and); }
 	| expr OR expr	{ code(or); }
 	| NOT expr	{ $$ = $2; code(not); }
+	| DEC expr  { $$ = $2; code(dec); }
+	| INC expr  { $$ = $2; code(inc); }
+	| expr DEC  { $$ = $1; code(dec); }
+	| expr INC  { $$ = $1; code(inc); }
 	;
 expr2: /* nothing */
 	| expr			{ code(STOP); $$ = $1; }
@@ -256,6 +260,8 @@ yylex()		/* hoc7 */
 	case '!':	return follow('=', NE, NOT);
 	case '|':	return follow('|', OR, '|');
 	case '&':	return follow('&', AND, '&');
+	case '-':   return follow('-', DEC, '-');
+	case '+':   return follow('+', INC, '+');
 	case '\n':	lineno++; return '\n';
 	default:	return c;
 	}
