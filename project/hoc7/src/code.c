@@ -209,7 +209,6 @@ bltinArr()
 	d1 = pop();
 	d2 = pop();
 	// printf("hello %lf\n", d1.val);
-	printf("hello %s\n", d2.sym->type);
 
 	sorting(d1,d2);
 
@@ -238,6 +237,7 @@ eval()		/* evaluate variable on stack */
 		double index_value = index.val;
 		// printf("index : %d \n", (int)index_value);
 		// printf("evaluating a array: %s \n", d.sym->name);
+		temp = d.sym; 
 		d.val = d.sym->u.arr[(int)index.val];
 		//array.val = index;
 		push(d); 
@@ -410,21 +410,41 @@ power()
 
 sorting(Datum d1, Datum d2)
 {
-	printf("hello %lf\n", d1.val);
-	printf("hello %lf\n", d2.val);
-	// printf("hello %s\n", d2.sym->name);
+	// printf("hello %lf\n", d1.val);
+	// printf("hello %lf\n", d2.val);
+	int n = (int) d1.val;
 	
-	//double start = d3.val;
-	// if (d1.sym->type != ARR && d1.sym->type != UNDEF)
-		// execerror("sort function to a non-variable", d1.sym->name);
-	// Sort(d1.sym->u.arr, d3.val, d2.val);
-	// printf("value : %lf \n", d1.sym->u.arr[(int)index]);
-	// d1.sym->type = ARR;
-	// printf("d2 value : %d \n", d2.val);
-	// printf("variable name : %s value : %d \n", d1.sym->name, d1.sym->u.arr[index]);
-	// push(d2);
-	return ;
+	if (temp->type != ARR && temp->type != UNDEF)
+		execerror("sort function to a non-array", d1.sym->name);
+	
+	double* array = temp->u.arr; 
 
+	// printf("%lf \n", arr[1]);
+	// for(int i=0; i<4; i++) {
+	//  	printf("%lf ", array[i]);
+	// }
+	// printf("\n");
+
+
+	for(int i=0; i<n; i++) {
+    	int minIndx = i;
+    	for(int j=i+1; j < n; j++) {
+        	if(array[j] < array[minIndx]) {
+            	minIndx = j;
+        	}
+    	}
+    	double temp = array[minIndx];
+    	array[minIndx] = array[i];
+    	array[i] = temp;
+	}
+	// printf("sorted array : ");
+	// for(int i=0; i<4; i++) {
+	// 	printf("%lf ", array[i]);
+	// }
+	// printf("done \n");
+	
+	// push(d2);
+	return;
 }
 
 assign()
