@@ -90,6 +90,36 @@ forcode()
 	Datum d;
 	Inst *savepc = pc;
 
+	// printf("hello from for loop\n");
+
+	execute(*((Inst **)(savepc+1))); /* init */
+	// printf("init instruction\n");
+
+	execute(*((Inst **)(savepc+2)));	/* condition */
+	// printf("condition instruction\n");
+
+	d = pop();
+	while (d.val) {
+		// printf("d val before loop : %lf\n", d.val);
+		execute(*((Inst **)(savepc)));	/* body */
+		if (returning)
+			break;
+		execute(*((Inst **)(savepc+3)));
+		// printf("inicrement instruction\n");
+		execute(*((Inst **)(savepc+2)));	/* condition */
+		// printf("condition instruction\n");
+		d = pop();
+		// printf("d val after loop : %lf\n", d.val);
+	}
+	if (!returning)
+		pc = *((Inst **)(savepc+4)); /* next stmt */
+}
+
+tforcode() 
+{
+	Datum d;
+	Inst *savepc = pc;
+
 	// execute(*((Inst **)(savepc+1)));
 	execute(savepc+3);	/* condition */
 	d = pop();
@@ -306,6 +336,7 @@ inc() {
 	d = pop();
 	d.val = d.val + 1;
 	temp->u.val = d.val;
+	// printf("incrementing %s \n", temp->name);
 	push(d);
 }
 

@@ -1,25 +1,25 @@
 size = 3
 c(0,0) = 0
 
-[i=0] for (i<size; i=i+1) {
-    [j=0] for (j<size; j=j+1) {
+for (i=0; i<size; i=i+1) {
+    for (j=0; j<size; j=j+1) {
         a(i,j) = i+j
         b(i,j) = i*j
     }
 }
 
 
-[i=0] for (i<size; i=i+1) {
-    [j=0] for (j<size; j=j+1) {
-        [k=0] for (k<size; k=k+1) {
+for (i=0; i<size; i=i+1) {
+    for (j=0; j<size; j=j+1) {
+        for (k=0; k<size; k=k+1) {
             c(i,j) = c(i,j) + a(i,k)*b(k,j)
         }
     }
 }
 
 
-[i=0] for (i<size; i=i+1) {
-    [j=0] for (j<size; j=j+1) {
+for (i=0; i<size; i=i+1) {
+    for (j=0;j<size; j=j+1) {
         print(c(i,j))
     }
 }
