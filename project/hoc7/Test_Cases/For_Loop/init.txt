@@ -1,4 +1,4 @@
-[j=0] for (j<5;j=j+2) {
+[UNROLL=2] ufor(j=0;j<5;j++) {
     print(j)
 }
 

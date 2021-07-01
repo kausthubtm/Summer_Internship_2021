@@ -77,8 +77,7 @@ whilecode()
 		execute(*((Inst **)(savepc)));	/* body */
 		if (returning)
 			break;
-		execute(savepc+2);	/* condition */
-		d = pop();
+
 		// printf("d val after loop : %lf\n", d.val);
 	}
 	if (!returning)
@@ -115,26 +114,42 @@ forcode()
 		pc = *((Inst **)(savepc+4)); /* next stmt */
 }
 
-tforcode() 
+uforcode()
 {
 	Datum d;
 	Inst *savepc = pc;
 
-	// execute(*((Inst **)(savepc+1)));
-	execute(savepc+3);	/* condition */
+	// printf("hello from for loop\n");
+
+	execute(*((Inst **)(savepc+1))); /* init */
+	// printf("init instruction\n");
+
+	execute(*((Inst **)(savepc+2)));	/* condition */
+	// printf("condition instruction\n");
+
 	d = pop();
+	Symbol *s;
+	s = lookup("UNROLL");
+	int unroll = (int) s->u.val;
+	printf(" times to unroll : %d\n",unroll);
+
 	while (d.val) {
 		// printf("d val before loop : %lf\n", d.val);
-		execute(*((Inst **)(savepc)));	/* body */
-		if (returning)
-			break;
-		execute(*((Inst **)(savepc+1)));
-		execute(savepc+3);	/* condition */
+
+		for(int i=0; i<unroll; i++){
+			execute(*((Inst **)(savepc)));	/* body */
+			if (returning)
+				break;
+			execute(*((Inst **)(savepc+3)));
+		}
+		// printf("inicrement instruction\n");
+		execute(*((Inst **)(savepc+2)));	/* condition */
+		// printf("condition instruction\n");
 		d = pop();
 		// printf("d val after loop : %lf\n", d.val);
 	}
 	if (!returning)
-		pc = *((Inst **)(savepc+2)); /* next stmt */
+		pc = *((Inst **)(savepc+4)); /* next stmt */
 }
 
 ifcode() 

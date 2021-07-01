@@ -27,5 +27,5 @@ extern	Inst *progp, *progbase, prog[], *code();
 extern	assign(), assignArr(), assignMat(), bltin(), bltinArr(), varpush(), constpush(), print(), varread();
 extern	prexpr(), prstr();
 extern	gt(), lt(), eq(), ge(), le(), ne(), and(), or(), not(), dec(), inc();
-extern	ifcode(), whilecode(), forcode(), call(), arg(), argassign();
+extern	ifcode(), whilecode(), forcode(), uforcode(), call(), arg(), argassign();
 extern	funcret(), procret();
