@@ -17,7 +17,7 @@ This repo contains an upgraded version of hoc6 and I call it **hoc7** :D !! .
 - For loop functionality
 - Increment and Decrement Operations
 - Builtin function for sort
-- Urolling for
+- Unrolling for
 
 ## Extra
 - [This](https://github.com/kausthubtm/HOC) repo contains information and code of all the older versions of hoc. 
