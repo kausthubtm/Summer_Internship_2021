@@ -131,12 +131,13 @@ uforcode()
 	Symbol *s;
 	s = lookup("UNROLL");
 	int unroll = (int) s->u.val;
-	printf(" times to unroll : %d\n",unroll);
+	// printf(" times to unroll : %d\n",unroll);
 
 	while (d.val) {
 		// printf("d val before loop : %lf\n", d.val);
 
 		for(int i=0; i<unroll; i++){
+			// printf("%d\n", i);
 			execute(*((Inst **)(savepc)));	/* body */
 			if (returning)
 				break;
